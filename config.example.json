@@ -1,0 +1,8 @@
+{
+  "youtube_api_key": "YOUR_YOUTUBE_API_KEY_HERE",
+  "oauth2_credentials_file": "client_secret.json",
+  "token_file": "token.json",
+  "server_name": "youtube-mcp-server",
+  "server_version": "1.0.0",
+  "server_description": "YouTube Data API v3 MCP Server for video search, channel info, and more"
+}
