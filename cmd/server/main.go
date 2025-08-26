@@ -1,6 +1,7 @@
 package main
 
 import (
+	"context"
 	"flag"
 	"fmt"
 	"log"
@@ -8,8 +9,7 @@ import (
 
 	"youtube-mcp/pkg/server"
 
-	mcp_golang "github.com/metoro-io/mcp-golang"
-	"github.com/metoro-io/mcp-golang/transport/stdio"
+	"github.com/modelcontextprotocol/go-sdk/mcp"
 )
 
 func main() {
@@ -62,14 +62,16 @@ func main() {
 		log.Fatalf("Failed to create YouTube client: %v", err)
 	}
 
-	// Create MCP server with stdio transport
-	transport := stdio.NewStdioServerTransport()
-	mcpServer := mcp_golang.NewServer(transport)
-
-	// Note: Server info is automatically set by the MCP library
-
-	// Register MCP tools
-	if err := server.SetupMCPTools(mcpServer, youtubeClient); err != nil {
+	// Create MCP server using official SDK
+	implementation := &mcp.Implementation{
+		Name:    cfg.ServerName,
+		Version: cfg.ServerVersion,
+	}
+	
+	mcpServer := mcp.NewServer(implementation, nil)
+	
+	// Register MCP tools using the official SDK
+	if err := server.SetupOfficialMCPTools(mcpServer, youtubeClient); err != nil {
 		log.Fatalf("Failed to setup MCP tools: %v", err)
 	}
 
@@ -77,7 +79,10 @@ func main() {
 	log.Printf("Starting %s v%s", cfg.ServerName, cfg.ServerVersion)
 	log.Printf("Server description: %s", cfg.ServerDescription)
 	
-	if err := mcpServer.Serve(); err != nil {
+	// Run the server over stdin/stdout using official SDK
+	ctx := context.Background()
+	transport := &mcp.StdioTransport{}
+	if err := mcpServer.Run(ctx, transport); err != nil {
 		log.Fatalf("Failed to start MCP server: %v", err)
 	}
 }
